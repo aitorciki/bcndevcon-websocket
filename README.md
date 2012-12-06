@@ -5,9 +5,9 @@ If you've been in the talk, your know what this does: it's a very simple example
 
 The server is a Python script. Just run it after installing some dependencies:
 
-Twisted==12.2.0
-autobahn==0.5.9
-psutil==0.6.1
+* Twisted==12.2.0
+* autobahn==0.5.9
+* psutil==0.6.1
 
 The client is a webpage containing some JavaScript. You'll have to add d3.js to the same directory and serve it from a webserver.
 
