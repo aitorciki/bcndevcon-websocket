@@ -1,0 +1,107 @@
+<!doctype html>
+
+<html>
+
+    <head>
+        <title>WebSocket</title>
+        <script type="text/javascript" src="d3.js"></script>
+        <style type="text/css">
+            body {
+                font-family: 'Helvetica Neue';
+            }
+
+            .cpu {
+                width: 640px;
+                margin: 30px;
+                background-color: #e5e6db;
+                border: 1px solid;
+            }
+
+            .cpu rect {
+                stroke: #fff;
+                fill: #4d87b7;
+            }
+
+            .cpu text {
+                fill: #fff;
+            }
+        </style>
+    </head>
+
+    <body>
+
+        <script type="text/javascript">
+            window.onload = function() {
+
+                /* WebSocket stuff */
+                var socket = new WebSocket('ws://localhost:9000');
+
+                socket.onopen = function() {
+                    console.log('Connected to ' + socket.url);
+                }
+
+                socket.onclose = function() {
+                    console.log('Disconnected from ' + socket.url);
+                }
+
+                socket.onerror = function(e) {
+                    console.log('Ooops... ' + e);
+                }
+
+                socket.onmessage = function(e) {
+                    redraw(JSON.parse(e.data));
+                }
+
+                /* D3 magic */
+                var bar_height = 40;
+
+                /* create a heightless svg, we still don't know how
+                 * many cpu bars to draw */
+                var chart = d3.select('body').append('svg')
+                    .attr('class', 'cpu')
+                    .attr('height', 0);
+
+                var x = d3.scale.linear()
+                    .domain([0, 100])
+                    .range([0, parseInt(chart.style('width'))]);
+
+                var redraw = function(data) {
+                    /* adapt svg height to the number of cpus in the
+                     * received message */
+                    chart.transition()
+                        .duration(500)
+                        .attr('height', data.length * bar_height);
+
+                    var rect = chart.selectAll('rect').data(data);
+
+                    rect.enter().append('rect')
+                        .attr('y', function(d, i) { return i * bar_height })
+                        .attr('width', x)
+                        .attr('height', bar_height);
+
+                    rect.transition()
+                        .duration(1000)
+                        .attr('width', x);
+
+                    var text = chart.selectAll('text').data(data);
+
+                    text.enter().append('text')
+                        .attr('x', x)
+                        .attr('y', function(d, i) { return i * bar_height })
+                        .attr('dx', -6)
+                        .attr('dy', '1.6em')
+                        .attr('text-anchor', 'end')
+                        .text(String);
+
+                    text.transition()
+                        .duration(1000)
+                        .attr('x', x)
+                        .text(String);
+                }
+
+            }
+        </script>
+
+    </body>
+
+</html>
